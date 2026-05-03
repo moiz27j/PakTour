@@ -1,0 +1,976 @@
+/* Dark Mode Variables */
+:root {
+    --light-bg: #f8f9fa;
+    --light-text: #333;
+    --light-secondary-text: #6b7280;
+    --light-card-bg: white;
+    --light-primary: #4169e1;
+    --light-primary-dark: #3658c5;
+    --light-border: #e5e7eb;
+    --light-secondary-bg: #f3f4f6;
+    --light-error-bg: #fee2e2;
+    --light-error-text: #b91c1c;
+    --light-highlight: #facc15;
+    --light-empty-star: #d1d5db;
+    --light-header-gradient: linear-gradient(135deg, #4169e1 0%, #1e3a8a 100%);
+    --light-shadow-color: rgba(0, 0, 0, 0.1);
+    --light-modal-overlay: rgba(0, 0, 0, 0.5);
+    --light-available: #10b981;
+  
+    /* Dark mode colors */
+    --dark-bg: #121212;
+    --dark-text: #f0f0f0;
+    --dark-secondary-text: #a0a0a0;
+    --dark-card-bg: #1e1e1e;
+    --dark-primary: #5c7cfa;
+    --dark-primary-dark: #4263eb;
+    --dark-border: #333333;
+    --dark-secondary-bg: #252525;
+    --dark-error-bg: #3b1818;
+    --dark-error-text: #f87171;
+    --dark-highlight: #fbbf24;
+    --dark-empty-star: #4b4b4b;
+    --dark-header-gradient: linear-gradient(135deg, #364fc7 0%, #1e3a8a 100%);
+    --dark-shadow-color: rgba(0, 0, 0, 0.3);
+    --dark-modal-overlay: rgba(0, 0, 0, 0.7);
+    --dark-available: #059669;
+    
+    /* Set default (light mode) variables */
+    --bg: var(--light-bg);
+    --text: var(--light-text);
+    --secondary-text: var(--light-secondary-text);
+    --card-bg: var(--light-card-bg);
+    --primary: var(--light-primary);
+    --primary-dark: var(--light-primary-dark);
+    --border: var(--light-border);
+    --secondary-bg: var(--light-secondary-bg);
+    --error-bg: var(--light-error-bg);
+    --error-text: var(--light-error-text);
+    --highlight: var(--light-highlight);
+    --empty-star: var(--light-empty-star);
+    --header-gradient: var(--light-header-gradient);
+    --shadow-color: var(--light-shadow-color);
+    --modal-overlay: var(--light-modal-overlay);
+    --available: var(--light-available);
+  }
+  
+  /* Dark Mode Class */
+  .dark {
+    --bg: var(--dark-bg);
+    --text: var(--dark-text);
+    --secondary-text: var(--dark-secondary-text);
+    --card-bg: var(--dark-card-bg);
+    --primary: var(--dark-primary);
+    --primary-dark: var(--dark-primary-dark);
+    --border: var(--dark-border);
+    --secondary-bg: var(--dark-secondary-bg);
+    --error-bg: var(--dark-error-bg);
+    --error-text: var(--dark-error-text);
+    --highlight: var(--dark-highlight);
+    --empty-star: var(--dark-empty-star);
+    --header-gradient: var(--dark-header-gradient);
+    --shadow-color: var(--dark-shadow-color);
+    --modal-overlay: var(--dark-modal-overlay);
+    --available: var(--dark-available);
+  }
+  
+  /* Base Styles */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    line-height: 1.6;
+    color: var(--text);
+    background-color: var(--bg);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .stayFinderApp {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  /* Header */
+  .header {
+    background: var(--header-gradient);
+    color: white;
+    padding: 4rem 1rem 3rem;
+    text-align: center;
+  }
+  
+  .appTitleAccom{
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .appTitleAccom span {
+    color: #f0f0f0;
+    opacity: 0.9;
+  }
+  
+  .appTaglineAccom {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+  }
+  
+  /* Theme Toggle */
+  .themeToggle {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+  
+  .themeToggle:hover {
+    opacity: 1;
+  }
+  
+  .themeToggle svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  /* Search Bar */
+  .searchContainerAccom {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .searchFormAccom {
+    position: relative;
+  }
+  
+  .inputWrapperAccom {
+    display: flex;
+    background-color: var(--card-bg);
+    border-radius: 9999px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px var(--shadow-color);
+  }
+  
+  .cityInput {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+    color: var(--text);
+    background-color: var(--card-bg);
+  }
+  
+  .searchButtonAccomodation{
+    background-color: var(--primary);
+    border: none;
+    color: white;
+    padding: 0; /* Remove padding completely */
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 65px; /* Fixed width instead of padding */
+    /* Remove height: 100% as it might be causing issues */
+  }
+  
+  .searchButton:hover {
+    background-color: var(--primary-dark);
+  }
+  
+  .searchButton svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* Filter Bar */
+  .filterBar {
+    background-color: var(--card-bg);
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 2px 4px var(--shadow-color);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  .accommodationTypeToggle {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  
+  .toggleButton {
+    display: flex;
+    align-items: center;
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--border);
+    padding: 0.5rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text);
+  }
+  
+  .toggleButton:first-child {
+    border-top-left-radius: 9999px;
+    border-bottom-left-radius: 9999px;
+  }
+  
+  .toggleButton:last-child {
+    border-top-right-radius: 9999px;
+    border-bottom-right-radius: 9999px;
+  }
+  
+  .toggleButton.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+  
+  .toggleButton svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 0.5rem;
+  }
+  
+.priceFilter {
+  display: flex;
+  justify-content:center;
+  align-items: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.priceInputs {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.inputGroup {
+  position: relative;
+  flex: 1;
+}
+
+.currencySymbol {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.priceInput {
+  width: 80%;
+  padding: 0.75rem;
+  padding-left: 2.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: all 0.2s;
+  appearance: none;
+}
+
+.priceInput:focus {
+  outline: none;
+  border-color: #4a7dff;
+  box-shadow: 0 0 0 2px rgba(74,125,255,0.1);
+}
+
+.priceSeparator {
+  color: #666;
+  font-weight: 500;
+}
+
+.priceInput::-webkit-inner-spin-button,
+.priceInput::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.priceInput[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+    
+  .rangeInputs {
+    position: relative;
+    height: 5px;
+    margin: 1rem 0;
+  }
+  
+  .sortControls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin:0.5rem;
+    margin-top:2rem;
+  }
+  
+  .sortControls label {
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+  }
+  
+  .sortSelect {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    font-size: 0.9rem;
+    background-color: var(--card-bg);
+    color: var(--text);
+    cursor: pointer;
+  }
+  
+  /* Main Content */
+  .mainContent {
+    flex: 1;
+    padding: 2rem 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  /* Loading Animation */
+  .loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 0;
+  }
+  
+  .loadingAnimation {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  
+  .dot {
+    width: 12px;
+    height: 12px;
+    margin: 0 4px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    animation: pulse 1.5s infinite ease-in-out;
+  }
+  
+  .dot1 {
+    animation-delay: 0s;
+  }
+  
+  .dot2 {
+    animation-delay: 0.3s;
+  }
+  
+  .dot3 {
+    animation-delay: 0.6s;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(0.8);
+      opacity: 0.6;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 1;
+    }
+  }
+  
+  /* Error Message */
+  .retryButton {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  .retryButton:hover {
+    background-color: #0056b3;
+  }
+  
+  .errorMessage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+    background: #fff3f3;
+    border-radius: 8px;
+    margin: 2rem auto;
+    max-width: 400px;
+  }
+  
+  .errorMessage svg {
+    width: 48px;
+    height: 48px;
+    stroke: #dc3545;
+    margin-bottom: 1rem;
+  }
+  
+  .errorMessage p {
+    color: #dc3545;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Results Section */
+  .resultsHeader {
+    margin-bottom: 1.5rem;
+  }
+  
+  .resultsHeader h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  
+  .highlightCity {
+    color: var(--primary);
+  }
+  
+  .resultsCount {
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+  }
+  
+  .accommodationImage {
+    position: relative;
+    width: 100%;
+    padding-top: 100%; /* This creates a square aspect ratio */
+    overflow: hidden;
+    border-radius: 8px 8px 0 0;
+  }
+  
+  .accommodationImage img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* This ensures the image covers the square container */
+    transition: transform 0.3s ease;
+  }
+  
+  .accommodationCard {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .accommodationsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    padding: 20px;
+  }
+  
+  .accommodationCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .accommodationCard:hover .accommodationImage img {
+    transform: scale(1.05);
+  }
+  
+  .statusIndicator {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .statusIndicator.available {
+    background-color: var(--available);
+    color: white;
+  }
+  
+  .accommodationContent {
+    padding: 1.25rem;
+  }
+  
+  .accommodationName {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+  
+  .accommodationAddress {
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .accommodationStats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .starRating {
+    display: flex;
+    align-items: center;
+  }
+  
+  .star {
+    color: var(--highlight);
+    font-size: 1.1rem;
+  }
+  
+  .star.empty {
+    color: var(--empty-star);
+  }
+  
+  .star.half {
+    position: relative;
+    color: var(--empty-star);
+  }
+  
+  .star.half:before {
+    content: '★';
+    position: absolute;
+    color: var(--highlight);
+    width: 50%;
+    overflow: hidden;
+  }
+  
+  .ratingNumber {
+    margin-left: 0.25rem;
+    font-size: 0.85rem;
+    color: var(--secondary-text);
+  }
+  
+  .reviewsCount {
+    font-size: 0.8rem;
+    color: var(--secondary-text);
+  }
+  
+  .priceContainer {
+    text-align: right;
+  }
+  
+  .price {
+    font-weight: 700;
+    color: var(--primary);
+  }
+  
+  .pricePeriod {
+    font-size: 0.8rem;
+    color: var(--secondary-text);
+  }
+  
+  .viewDetails {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+  
+  .viewDetails svg {
+    width: 16px;
+    height: 16px;
+    margin-left: 0.5rem;
+  }
+  
+  /* No Results */
+  .noresults {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 0;
+    text-align: center;
+  }
+  
+  .noResults-illustration {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1.5rem;
+    color: var(--secondary-text);
+  }
+  
+  .noResults h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  
+  .noResults p {
+    color: var(--secondary-text);
+  }
+  
+  /* Welcome Section */
+  .welcomeSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 0;
+    text-align: center;
+  }
+  
+  .welcomeIllustration {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 2rem;
+    color: var(--primary);
+  }
+  
+  .welcomeSection h2 {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  
+  .welcomeSection p {
+    color: var(--secondary-text);
+    max-width: 600px;
+    margin-bottom: 2rem;
+  }
+  
+  .welcomeTips {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-top: 1rem;
+  }
+  
+  .tip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 180px;
+  }
+  
+  .tipIcon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    color: var(--primary);
+  }
+  
+  .tipText {
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+  }
+  
+  /* Modal */
+  .modalOpen {
+    overflow: hidden;
+  }
+  
+  .modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--modal-overlay);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+    padding: 1rem;
+  }
+  
+  .accommodationModal {
+    background-color: var(--card-bg);
+    border-radius: 1rem;
+    overflow: hidden;
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 25px var(--shadow-color);
+    position: relative;
+  }
+  
+  .closeModal {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: var(--card-bg);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px var(--shadow-color);
+    z-index: 1;
+    color: var(--text);
+  }
+  
+  .closeModal svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .modalImage {
+    position: relative;
+    width: 100%;
+    padding-top: 100%; /* Makes it square */
+  }
+  
+  .modalImage img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .modalContent {
+    padding: 2rem;
+    overflow-y: auto;
+  }
+  
+  .modalTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+  
+  .modalStats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .modalRating {
+    display: flex;
+    align-items: center;
+  }
+  
+  .modalReviews {
+    margin-left: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+  }
+  
+  .modalPrice {
+    text-align: right;
+  }
+  
+  .priceAmount {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  
+  .pricePeriod {
+    font-size: 0.85rem;
+    color: var(--secondary-text);
+  }
+  
+  .modalInfo {
+    margin-bottom: 1.5rem;
+  }
+  
+  .infoItem {
+    display: flex;
+    margin-bottom: 1rem;
+  }
+  
+  .infoIcon {
+    width: 24px;
+    height: 24px;
+    margin-right: 1rem;
+    color: var(--secondary-text);
+  }
+  
+  .infoText {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .infoLabel {
+    font-size: 0.85rem;
+    color: var(--secondary-text);
+  }
+  
+  .infoValue {
+    font-weight: 500;
+    color: var(--text);
+  }
+  
+  .statusAvailable {
+    color: var(--available);
+  }
+  
+  .statusUnavailable {
+    color: var(--error-text);
+  }
+  
+  .modalAmenities {
+    margin-bottom: 1.5rem;
+  }
+  
+  .modalAmenities h4,
+  .modalDescription h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    color: var(--text);
+  }
+  
+  .amenitiesContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .amenityTag {
+    background-color: var(--secondary-bg);
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    color: var(--secondary-text);
+  }
+  
+  .modalDescription p {
+    color: var(--secondary-text);
+    line-height: 1.7;
+  }
+  
+  .modalActions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  .bookButton {
+    flex: 1;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .bookButton:hover {
+    background-color: var(--primary-dark);
+  }
+  
+  .saveButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--border);
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    color: var(--text);
+  }
+  
+  .saveButton:hover {
+    background-color: var(--border);
+  }
+  
+  .saveButton svg {
+    width: 18px;
+    height: 18px;
+    margin-right: 0.5rem;
+  }
+  
+  /* Footer */
+  .appFooter {
+    background-color: var(--secondary-bg);
+    padding: 1.5rem 1rem;
+    text-align: center;
+  }
+  
+  .copyright {
+    color: var(--secondary-text);
+    font-size: 0.85rem;
+  }
+  
+  /* Responsive */
+  @media (min-width: 768px) {
+  .accommodationModal {
+    flex-direction: row;
+    max-height: 80vh;
+  }
+  
+  .modalImage {
+    width: 50%;
+    padding-top: 50%; /* Keep square aspect ratio at 50% width */
+  }
+  
+  .modalContent {
+    width: 50%;
+    max-height: 80vh;
+  }
+}
+  
+  @media (max-width: 767px) {
+    .priceFilter {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .welcomeTips {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
