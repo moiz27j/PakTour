@@ -64,6 +64,36 @@ states = {
 
 system_message = []
 
+LLM_QUOTA_MESSAGE = (
+    "The AI planner is temporarily unavailable because the Gemini quota has been reached. "
+    "Please try again after the retry window, or update the Gemini API quota/key on the server."
+)
+
+
+def is_quota_error(error):
+    error_text = str(error).lower()
+    return (
+        "quota" in error_text
+        or "resource_exhausted" in error_text
+        or "429" in error_text
+        or "retry_delay" in error_text
+    )
+
+
+def invoke_llm(prompt):
+    try:
+        return {"status": "success", "content": model.invoke(prompt).content}
+    except Exception as e:
+        if is_quota_error(e):
+            print(f"LLM quota exhausted: {e}")
+            return {"status": "quota_exceeded", "content": LLM_QUOTA_MESSAGE}
+
+        print(f"LLM error: {e}")
+        return {
+            "status": "failure",
+            "content": "The AI planner hit an error while generating a response. Please try again."
+        }
+
 
 """ VALIDATING USER_INPUTS """
 """ IDEA: VALIDATE USER INPUTS USING LLM  """
@@ -83,9 +113,13 @@ def validate(prompt, user_input):
         # Format the prompt with the extracted parameter
         formatted_prompt = prompt.format(**{param_name: user_input})
         
-        response = model.invoke(formatted_prompt)
+        response = invoke_llm(formatted_prompt)
+        if response["status"] == "quota_exceeded":
+            return False, LLM_QUOTA_MESSAGE
+        if response["status"] == "failure":
+            return False, response["content"]
         
-        response_content = response.content.upper().strip()
+        response_content = response["content"].upper().strip()
         if "TRUE" in response_content:
             return True, "Input is valid."
         elif "FALSE" in response_content:
@@ -111,7 +145,7 @@ def get_destination(destination):
 
     validate_prompt = "Is {destination} a valid destination, ONLY RETURN TRUE OR FALSE STRICTLY "
     is_valid,message =  validate(validate_prompt,destination)  
-    if True:
+    if is_valid:
         return {"status" : "success", "message":message,"template" : destination_template.format(destination=destination)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
@@ -130,7 +164,7 @@ def get_origin(origin):
     )
     validate_prompt = "Is {origin} a valid origin place,ONLY RETURN TRUE OR FALSE STRICTLY"
     is_valid,message =  validate(validate_prompt,origin)  
-    if True:
+    if is_valid:
          return {"status" : "success", "message":message,"template" : origin_template.format(origin = origin)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
@@ -148,7 +182,7 @@ def get_days_of_travel(days_of_travel):
 
     validate_prompt = "Is {days_of_travel} valid days,ONLY RETURN TRUE OR FALSE STRICTLY"
     is_valid,message =  validate(validate_prompt,days_of_travel)  
-    if True:
+    if is_valid:
         return {"status" : "success", "message":message,"template" : days_of_travel_template.format(days_of_travel= days_of_travel)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
@@ -167,7 +201,7 @@ def get_mood(mood):
 
     validate_prompt = "Is {mood} a valid mood,ONLY RETURN TRUE OR FALSE STRICTLY"
     is_valid,message =  validate(validate_prompt,mood)  
-    if True:
+    if is_valid:
         return {"status" : "success", "message":message,"template" : mood_template.format(mood=mood)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
@@ -185,7 +219,7 @@ def get_route(route):
 
     validate_prompt = "Is {route} a valid route,ONLY RETURN TRUE OR FALSE STRICTLY"
     is_valid,message =  validate(validate_prompt,route)  
-    if True:
+    if is_valid:
         return {"status" : "success", "message":message,"template" : route_template.format(route=route)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
@@ -256,17 +290,27 @@ def generate_summary(collected_states):
         """)
     ])
     try:
-        chain = summary_template | model
-        summary_result = chain.invoke({
-            "destination": destination,
-            "origin": origin,
-            "days": days,
-            "mood": mood,
-            "route": route
-        })
-        trip_summary = summary_result.content
+        prompt = summary_template.format(
+            destination=destination,
+            origin=origin,
+            days=days,
+            mood=mood,
+            route=route
+        )
+        summary_result = invoke_llm(prompt)
+        if summary_result["status"] != "success":
+            return {
+                "status": summary_result["status"],
+                "message": summary_result["content"],
+                "trip_summary": None
+            }
+        trip_summary = summary_result["content"]
     except Exception as e:
-        trip_summary = f"Could not generate summary: {e}"
+        return {
+            "status": "failure",
+            "message": f"Could not generate summary: {e}",
+            "trip_summary": None
+        }
 
     return {
         "status": "success",
@@ -293,8 +337,10 @@ def get_chat_response(input : str):
 
     try:
         prompt = response_template.format(input = input)
-        response = model.invoke(prompt)
-        return {"status" : "success","message" :"Response Generated Successfully","output" :response.content }
+        response = invoke_llm(prompt)
+        if response["status"] != "success":
+            return {"status" : response["status"],"message" :response["content"],"output" : None }
+        return {"status" : "success","message" :"Response Generated Successfully","output" :response["content"] }
 
     
     except Exception as e:
@@ -376,7 +422,8 @@ async def chat(request : Request):
             session["current_step"] = "origin"
             session["states"]["destination"] = user_input
             template = response["template"]
-            return_json = model.invoke(template).content
+            llm_response = invoke_llm(template)
+            return_json = llm_response["content"]
         else:
             return_json = f"Error: {response['message']} Please provide a valid destination."
             
@@ -387,7 +434,8 @@ async def chat(request : Request):
             session["current_step"] = "days"
             states["origin"] = user_input
             template = response["template"]
-            return_json = model.invoke(template).content
+            llm_response = invoke_llm(template)
+            return_json = llm_response["content"]
         else:
             return_json = f"Error: {response['message']} Please provide a valid origin."
     
@@ -397,7 +445,8 @@ async def chat(request : Request):
             session["current_step"] = "mood"
             states["days"] = user_input
             template = response["template"]
-            return_json = model.invoke(template).content
+            llm_response = invoke_llm(template)
+            return_json = llm_response["content"]
         else:
             return_json = f"Error: {response['message']} Please provide a valid day."
     
@@ -407,7 +456,8 @@ async def chat(request : Request):
             session["current_step"] = "route"
             states["mood"] = user_input
             template = response["template"]
-            return_json = model.invoke(template).content
+            llm_response = invoke_llm(template)
+            return_json = llm_response["content"]
         else:
             return_json = f"Error: {response['message']} Please provide a valid mood."
 
@@ -427,7 +477,7 @@ async def chat(request : Request):
                 })
             else:
                 return JSONResponse(content={
-                    "message": f"Error: {summary_response['message']} Please provide a valid summary.",
+                    "message": summary_response["message"],
                     "step": session["current_step"],
                     "session_id": session_id
                 })
@@ -439,7 +489,7 @@ async def chat(request : Request):
         if response["status"] == "success":
             return_json = response.get("output", "No response generated.")
         else:
-            return_json = f"Error: {response['message']}"
+            return_json = response["message"]
 
 
             
