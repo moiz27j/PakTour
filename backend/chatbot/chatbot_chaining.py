@@ -135,94 +135,60 @@ def validate(prompt, user_input):
 
 def get_destination(destination):
     """ Gets the Destination From the User """
-    system_message.append(destination_system_message)
-    destination_template = ChatPromptTemplate.from_messages(
-        [
-            ("system",system_message),
-            ("human","Given the User Input: {destination}, Confirm the Destination and ask for the starting location")
-        ]
-    )
-
-    validate_prompt = "Is {destination} a valid destination, ONLY RETURN TRUE OR FALSE STRICTLY "
-    is_valid,message =  validate(validate_prompt,destination)  
-    if is_valid:
-        return {"status" : "success", "message":message,"template" : destination_template.format(destination=destination)}
-    else:
-        return {"status" : "failure", "message":message,"template" : None}
+    if destination and destination.strip():
+        return {
+            "status" : "success",
+            "message": "Input is valid.",
+            "reply": f"Great, {destination.strip()} sounds like a lovely destination. Where will you be starting from?"
+        }
+    return {"status" : "failure", "message":"Please enter a destination.","reply" : None}
 
 # response = validate("Is {user_input} a valid destination, ONLY RETURN TRUE OR FALSE STRICTLY","lahore")
 # print(response)
 
 def get_origin(origin):
     """ Gets the Start Location from the User """
-    system_message.append(origin_system_message)
-    origin_template = ChatPromptTemplate.from_messages(
-        [
-            ("system",system_message),
-            ("human","Given the User Input: {origin}, Confirm the Start Location and ask for the days of travel")
-        ]
-    )
-    validate_prompt = "Is {origin} a valid origin place,ONLY RETURN TRUE OR FALSE STRICTLY"
-    is_valid,message =  validate(validate_prompt,origin)  
-    if is_valid:
-         return {"status" : "success", "message":message,"template" : origin_template.format(origin = origin)}
-    else:
-        return {"status" : "failure", "message":message,"template" : None}
+    if origin and origin.strip():
+         return {
+             "status" : "success",
+             "message": "Input is valid.",
+             "reply": f"Perfect, starting from {origin.strip()}. How many days do you want the trip to be?"
+         }
+    return {"status" : "failure", "message":"Please enter a starting location.","reply" : None}
 
 
 def get_days_of_travel(days_of_travel):
     """ Takes in Responce of Initial_prompt_template Contemplates the Days of Travel """
-    system_message.append(days_system_message)
-    days_of_travel_template = ChatPromptTemplate.from_messages(
-        [
-            ("system",system_message),
-            ("human","Given the User Input: {days_of_travel}, Confirm the Days of Travel and ask for the Mood of Travel")
-        ]
-    )
-
-    validate_prompt = "Is {days_of_travel} valid days,ONLY RETURN TRUE OR FALSE STRICTLY"
-    is_valid,message =  validate(validate_prompt,days_of_travel)  
-    if is_valid:
-        return {"status" : "success", "message":message,"template" : days_of_travel_template.format(days_of_travel= days_of_travel)}
-    else:
-        return {"status" : "failure", "message":message,"template" : None}
+    if days_of_travel and days_of_travel.strip():
+        return {
+            "status" : "success",
+            "message": "Input is valid.",
+            "reply": f"Nice, a {days_of_travel.strip()} day trip. What mood or theme do you want, like relaxing, historical, adventurous, or food-focused?"
+        }
+    return {"status" : "failure", "message":"Please enter the number of travel days.","reply" : None}
 
 
 
 def get_mood(mood):
     """  Takes in Responce of Days_of_travel and Contemplates the Mood of Travel """
-    system_message.append(mood_system_message)
-    mood_template = ChatPromptTemplate.from_messages(
-        [
-            ("system",system_message),
-            ("human","Given the User Input: {mood}, Confirm the Mood of Travel and ask for the Route Preference")
-        ]
-    )
-
-    validate_prompt = "Is {mood} a valid mood,ONLY RETURN TRUE OR FALSE STRICTLY"
-    is_valid,message =  validate(validate_prompt,mood)  
-    if is_valid:
-        return {"status" : "success", "message":message,"template" : mood_template.format(mood=mood)}
-    else:
-        return {"status" : "failure", "message":message,"template" : None}
+    if mood and mood.strip():
+        return {
+            "status" : "success",
+            "message": "Input is valid.",
+            "reply": f"Got it, I will shape the trip around a {mood.strip()} mood. What route or transport do you prefer?"
+        }
+    return {"status" : "failure", "message":"Please enter a trip mood or theme.","reply" : None}
 
 
 def get_route(route):
     """ Takes in Responce of Mood and Contemplates the Route of Travel """
-    system_message.append(route_system_message)
-    route_template = ChatPromptTemplate.from_messages(
-        [
-            ("system",system_message),
-            ("human", "Given the User Input: {route}, Confirm the Route Preference and let the user know that all information has been collected")
-        ]
-    )
-
-    validate_prompt = "Is {route} a valid route,ONLY RETURN TRUE OR FALSE STRICTLY"
-    is_valid,message =  validate(validate_prompt,route)  
-    if is_valid:
-        return {"status" : "success", "message":message,"template" : route_template.format(route=route)}
-    else:
-        return {"status" : "failure", "message":message,"template" : None}
+    if route and route.strip():
+        return {
+            "status" : "success",
+            "message": "Input is valid.",
+            "reply": "Thanks, I have everything I need to create your trip plan."
+        }
+    return {"status" : "failure", "message":"Please enter your preferred route or transport.","reply" : None}
 
 
 ## UPDATED THIS IN NEXT FUNCTION
@@ -421,9 +387,7 @@ async def chat(request : Request):
         if response["status"] == "success":
             session["current_step"] = "origin"
             session["states"]["destination"] = user_input
-            template = response["template"]
-            llm_response = invoke_llm(template)
-            return_json = llm_response["content"]
+            return_json = response["reply"]
         else:
             return_json = f"Error: {response['message']} Please provide a valid destination."
             
@@ -433,9 +397,7 @@ async def chat(request : Request):
         if response["status"] == "success":
             session["current_step"] = "days"
             states["origin"] = user_input
-            template = response["template"]
-            llm_response = invoke_llm(template)
-            return_json = llm_response["content"]
+            return_json = response["reply"]
         else:
             return_json = f"Error: {response['message']} Please provide a valid origin."
     
@@ -444,9 +406,7 @@ async def chat(request : Request):
         if response["status"] == "success":
             session["current_step"] = "mood"
             states["days"] = user_input
-            template = response["template"]
-            llm_response = invoke_llm(template)
-            return_json = llm_response["content"]
+            return_json = response["reply"]
         else:
             return_json = f"Error: {response['message']} Please provide a valid day."
     
@@ -455,9 +415,7 @@ async def chat(request : Request):
         if response["status"] == "success":
             session["current_step"] = "route"
             states["mood"] = user_input
-            template = response["template"]
-            llm_response = invoke_llm(template)
-            return_json = llm_response["content"]
+            return_json = response["reply"]
         else:
             return_json = f"Error: {response['message']} Please provide a valid mood."
 
@@ -508,8 +466,11 @@ from typing import Optional
 
 # @app.post("/reset")
 async def reset_conversation(request: Request):
-    data = await request.json()
-    session_id = data.get("session_id")
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+    session_id = data.get("session_id") or request.headers.get("X-Session-ID")
     
     # Create new session
     new_session_id = session_manager.create_session()

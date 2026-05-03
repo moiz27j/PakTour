@@ -26,6 +26,23 @@ const TypingIndicator = () => {
   );
 };
 
+const parseApiResponse = async (response) => {
+  const responseText = await response.text();
+  let data = {};
+
+  try {
+    data = responseText ? JSON.parse(responseText) : {};
+  } catch (error) {
+    data = { message: responseText };
+  }
+
+  if (!response.ok) {
+    throw new Error(data.message || data.detail || `Request failed with status ${response.status}`);
+  }
+
+  return data;
+};
+
 // Main App component
 function Chat() {
   // Existing state
@@ -52,7 +69,7 @@ function Chat() {
           body: JSON.stringify({ user_input: '' }),
         });
         
-        const data = await response.json();
+        const data = await parseApiResponse(response);
         if (data.session_id) {
           setSessionId(data.session_id);
           setIsSessionActive(true);
@@ -60,9 +77,9 @@ function Chat() {
         
         // Show initial bot message
         handleBotResponse("Hello! I can help you plan your trip. Please tell me your destination.");
-      } catch (error) {
-        console.error('Error initializing session:', error);
-        handleBotResponse("Sorry, I couldn't start a new session. Please try refreshing the page.");
+    } catch (error) {
+      console.error('Error initializing session:', error);
+      handleBotResponse(error.message || "Sorry, I couldn't start a new session. Please try refreshing the page.");
       }
     };
 
@@ -92,7 +109,7 @@ function Chat() {
         }),
       });
       
-      const data = await response.json();
+      const data = await parseApiResponse(response);
       
       if (data.session_expired) {
         setIsSessionActive(false);
@@ -120,7 +137,7 @@ function Chat() {
     } catch (error) {
       console.error('Error sending message:', error);
       setIsTyping(false);
-      handleBotResponse("Sorry, I encountered an error. Please try again.");
+      handleBotResponse(error.message || "Sorry, I encountered an error. Please try again.");
     }
   };
   
@@ -140,7 +157,7 @@ function Chat() {
         }
       });
       
-      const data = await response.json();
+      const data = await parseApiResponse(response);
       
       // Reset all states
       setMessages([]);
@@ -160,7 +177,7 @@ function Chat() {
       
     } catch (error) {
       console.error('Error resetting conversation:', error);
-      handleBotResponse("Sorry, I couldn't reset the conversation. Please refresh the page.");
+      handleBotResponse(error.message || "Sorry, I couldn't reset the conversation. Please refresh the page.");
     }
   };
 
