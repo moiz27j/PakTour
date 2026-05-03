@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-from routes.flight_routes import options_flight,flight
 from routes.restaurant_api import place_photo,random_photo,restaurant
 from routes.nearby_search import get_data
 from routes.hotel_search import get_hotel_data_for_location,get_airbnb_data_for_location
@@ -27,8 +26,8 @@ app.add_middleware(
 )
 
 
-## FLIGHT_ROUTES ROUTERS
-app.add_api_route("/flight",endpoint=flight,methods=["POST"])
+# Flight routes are disabled because the flight provider is currently failing.
+# The chatbot now uses only the LLM path and does not depend on this endpoint.
 
 ## RESTAURANT_API ROUTERS
 app.add_api_route("/place-photo",endpoint=place_photo,methods = ["GET"])

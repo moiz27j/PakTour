@@ -21,7 +21,6 @@
 
 """
 
-from fast_flights import FlightData, Passengers, Result, get_flights
 from fastapi import FastAPI,Request
 from fastapi.responses import JSONResponse
 from langchain.prompts import ChatPromptTemplate
@@ -224,22 +223,21 @@ def get_route(route):
 """
 
 
-def generate_summary():
+def generate_summary(collected_states):
     """ 
     Gathers all user inputs, validates them, chains them, 
-    and generates a comprehensive travel summary, including
-    flights, restaurants, and tourist attractions.
+    and generates a comprehensive travel summary using only the LLM.
     """
     # Step 1: Validate input states
-    for key, value in states.items():
+    for key, value in collected_states.items():
         if value is None:
             return {"status": "failure", "message": f"{key} is None", "returnType": None}
 
-    destination = states["destination"]
-    origin = states["origin"]
-    days = states["days"]
-    mood = states["mood"]
-    route = states["route"]
+    destination = collected_states["destination"]
+    origin = collected_states["origin"]
+    days = collected_states["days"]
+    mood = collected_states["mood"]
+    route = collected_states["route"]
 
     # Step 2: Generate trip summary (LLM)
     summary_template = ChatPromptTemplate.from_messages([
@@ -270,76 +268,10 @@ def generate_summary():
     except Exception as e:
         trip_summary = f"Could not generate summary: {e}"
 
-    # Step 3: Fetch flights and format
-    try:
-        # You should use a real date here, not a hardcoded one!
-        flights_raw = fetch_flight_details("KHI", "ISB", "2025-05-30")
-        flights = []
-        for f in flights_raw.get("flights", []):
-            flights.append({
-                "is_best": getattr(f, "is_best", None),
-                "name": getattr(f, "name", None),
-                "departure": getattr(f, "departure", None),
-                "arrival": getattr(f, "arrival", None),
-                "duration": getattr(f, "duration", None),
-                "stops": getattr(f, "stops", None),
-                "price": getattr(f, "price", None),
-            })
-        current_price = flights_raw.get("current_price", None)
-    except Exception as e:
-        flights = []
-        current_price = None
-
-    # Step 4: Fetch restaurants and format
-    try:
-        restaurants_raw = get_restaurant_by_city(destination)
-        restaurants = []
-        for r in restaurants_raw:
-            restaurants.append({
-                "name": r.get("name"),
-                "address": r.get("address"),
-                "rating": r.get("rating"),
-                "types": r.get("types"),
-                "image": r.get("image"),
-                "_id": r.get("_id"),
-                "city": r.get("city"),
-            })
-    except Exception as e:
-        restaurants = []
-
-    # Step 5: Fetch tourist attractions and format
-    try:
-        attractions_raw = get_data_sync("tourist_attraction", destination)
-        attractions = []
-        for a in attractions_raw:
-            attractions.append({
-                "place_id": a.get("place_id"),
-                "name": a.get("name"),
-                "types": a.get("types"),
-                "location": a.get("location"),
-                "address": a.get("address"),
-                "rating": a.get("rating"),
-                "user_ratings_total": a.get("user_ratings_total"),
-                "open_now": a.get("open_now"),
-                "photo_reference": a.get("photo_reference"),
-                "icon": a.get("icon"),
-                "business_status": a.get("business_status"),
-                "price_level": a.get("price_level"),
-                "city": a.get("city"),
-                "_id": a.get("_id"),
-            })
-    except Exception as e:
-        attractions = []
-
-    # Step 6: Return all data
     return {
         "status": "success",
         "message": "Trip summary generated successfully",
-        "trip_summary": trip_summary,
-        "flights": flights,
-        "current_price": current_price,
-        "restaurants": restaurants,
-        "tourist_attractions": attractions
+        "trip_summary": trip_summary
     }
 
 def get_chat_response(input : str):
@@ -452,7 +384,7 @@ async def chat(request : Request):
     elif step == "origin":
         response = get_origin(user_input)
         if response["status"] == "success":
-            user_state["current_step"] = "days"
+            session["current_step"] = "days"
             states["origin"] = user_input
             template = response["template"]
             return_json = model.invoke(template).content
@@ -462,7 +394,7 @@ async def chat(request : Request):
     elif step == "days":
         response = get_days_of_travel(user_input)
         if response["status"] == "success":
-            user_state["current_step"] = "mood"
+            session["current_step"] = "mood"
             states["days"] = user_input
             template = response["template"]
             return_json = model.invoke(template).content
@@ -472,7 +404,7 @@ async def chat(request : Request):
     elif step == "mood":
         response = get_mood(user_input)
         if response["status"] == "success":
-            user_state["current_step"] = "route"
+            session["current_step"] = "route"
             states["mood"] = user_input
             template = response["template"]
             return_json = model.invoke(template).content
@@ -483,27 +415,26 @@ async def chat(request : Request):
         response = get_route(user_input)
         if response["status"] == "success":
             states["route"] = user_input
-            summary_response = generate_summary()
+            summary_response = generate_summary(states)
             if summary_response["status"] == "success":
                 print("AFTER SUMMARY")
-                user_state["current_step"] = "chat"
+                session["current_step"] = "chat"
                 return JSONResponse(content={
                     "message": summary_response["trip_summary"],
-                    "step": user_state["current_step"],
+                    "step": session["current_step"],
                     "trip_summary": summary_response["trip_summary"],
-                    "flights": summary_response["flights"],
-                    "restaurants": summary_response["restaurants"],
-                    "tourist_attractions": summary_response["tourist_attractions"]
+                    "session_id": session_id
                 })
             else:
                 return JSONResponse(content={
                     "message": f"Error: {summary_response['message']} Please provide a valid summary.",
-                    "step": user_state["current_step"]
+                    "step": session["current_step"],
+                    "session_id": session_id
                 })
             
     elif step == "chat":
         response = get_chat_response(user_input)
-        user_state["current_step"] = "chat" ## REMAIN IN CHAT 
+        session["current_step"] = "chat" ## REMAIN IN CHAT 
 
         if response["status"] == "success":
             return_json = response.get("output", "No response generated.")
@@ -523,83 +454,7 @@ async def chat(request : Request):
 
 
 
-def fetch_flight_details(from_airport: str, to_airport: str, date: str):
-    result: Result = get_flights(
-        flight_data=[
-            FlightData(date=date, from_airport=from_airport, to_airport=to_airport)
-        ],
-        trip="one-way",
-        seat="economy",
-        passengers=Passengers(adults=2, children=1, infants_in_seat=0, infants_on_lap=0),
-        fetch_mode="fallback",
-    )
-    return {
-        "flights": result.flights,
-        "current_price": result.current_price
-    } 
-
-
-from pymongo import MongoClient
 from typing import Optional
-
-# MongoDB connection
-client = MongoClient("mongodb://localhost:27017/")
-db = client['tourism']
-
-# Valid collections list
-COLLECTIONS = [
-    "tourist_attraction",
-    "zoo",
-    "movie_theater",
-    "museum",
-    "park",
-    "mosque",
-    "shopping_mall",
-    "church"
-]
-
-def get_data_sync(collection_name: str, city: str):
-    try:
-        # Validate inputs
-        if not collection_name or not city:
-            return {"error": "Both collection and city are required"}
-
-        if collection_name not in COLLECTIONS:
-            return {"error": f"Invalid collection: {collection_name}"}
-
-        # Get collection and query data
-        collection = db[collection_name]
-        query = {"city": {"$regex": f"^{city}$", "$options": "i"}}
-        
-        # Project only required fields
-        projection = {
-            "place_id": 1,
-            "name": 1,
-            "types": 1,
-            "location": 1,
-            "address": 1,
-            "rating": 1,
-            "user_ratings_total": 1,
-            "open_now": 1,
-            "photo_reference": 1,
-            "icon": 1,
-            "business_status": 1,
-            "price_level": 1,
-            "city": 1
-        }
-
-        # Find documents
-        results = list(collection.find(query, projection))
-
-        # Convert ObjectId to string
-        for result in results:
-            result["_id"] = str(result["_id"])
-
-        return results
-
-    except Exception as e:
-        return {"error": f"Server error: {str(e)}"}
-        
 
 # @app.post("/reset")
 async def reset_conversation(request: Request):
@@ -614,26 +469,6 @@ async def reset_conversation(request: Request):
         "step": "destination",
         "session_id": new_session_id
     })
-        
-
-def get_restaurant_by_city(city):
-    collection = db["restaurants"]
-    restaurants_cursor = collection.find({
-       "city": { "$regex": f"^{city}$", "$options": "i" } ## ISLAMABAD , Islmamabad , islamabad ARE ALL GOOD
-        })
-
-    restaurants = []
-    ## THE _id is in OBJECT NOT JSON FORMAT
-    for res in restaurants_cursor:
-        res["_id"] = str(res["_id"])
-        # img_reference = res["image"]
-        # google_image_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={img_reference}&key={api_key}"
-        
-        # res["image"] = google_image_url
-        restaurants.append(res)
-
-    
-    return restaurants
 
 
 
